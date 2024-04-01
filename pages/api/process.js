@@ -9,13 +9,29 @@ export default async function handler(req, res) {
     let jobDesc = req.body.jobDescription;
 
     // Load the DOCX file as a binary
-    const templatePath = path.resolve(process.cwd(), 'public', 'resumetemplate.docx');
+    const templatePath = path.resolve(process.cwd(), 'public', 'resume_template.docx');
     const content = fs.readFileSync(templatePath, 'binary');
 
     const zip = new PizZip(content);
-    const doc = new Docxtemplater(zip, {paragraphLoop: true, linebreaks: true});
+    const doc = new Docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+        nullGetter: (part) => {
+            if (!part.module) {
+                return "";
+            }
+            if (part.module === "rawxml") {
+                return "";
+            }
+            return "";
+        },
+    });
 
     // Set the templateVariables
+
+    let projects = selectItems(data.projects);//Select a max of 3 projects
+    
+    
     doc.setData({
       name: data.name,
       email: data.email,
@@ -23,8 +39,8 @@ export default async function handler(req, res) {
       college: data.college,
       experiences: data.experiences,
       skills: data.skills,
-      projects: data.projects,
-      // Add other data fields as necessary
+      projects: projects,
+      //TODO: ADD Certifications, other possible data things
     });
 
     try {
@@ -45,4 +61,10 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end('Method Not Allowed');
   }
+}
+
+
+function selectItems(data, count = 3) {
+    const shuffled = data.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count)
 }
