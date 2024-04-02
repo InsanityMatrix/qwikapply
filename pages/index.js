@@ -6,6 +6,8 @@ export default function Home() {
     const [resumeData, setResumeData] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [jfile, setFile] = useState(null);
+    const [isSubmittingResume, setIsSubmittingResume] = useState(false);
+    const [isSubmittingFile, setIsSubmittingFile] = useState(false); 
     const router = useRouter();
     
     const handleFileChange = (event) => {
@@ -14,6 +16,7 @@ export default function Home() {
 
     const handleSubmit = async (event) => {
       event.preventDefault();
+      setIsSubmittingResume(true);
       const formData = new FormData(event.target);
       const file = formData.get('resume');
       const jobDesc = formData.get('jobDescription');
@@ -32,7 +35,7 @@ export default function Home() {
             },
             body: JSON.stringify({ resume: json, jobDescription: jobDesc }),
           });
-    
+          setIsSubmittingResume(false);
           if (response.ok) {
             const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
@@ -48,6 +51,7 @@ export default function Home() {
           }
         } catch (error) {
           console.error("Error parsing JSON:", error);
+          setIsSubmittingResume(false);
           // Handle error (e.g., show an error message to the user)
         }
       };
@@ -57,9 +61,10 @@ export default function Home() {
 
     const handleSubmitFile = async (event) => {
         event.preventDefault();
-
+        setIsSubmittingFile(true);
         if (!jfile) {
             alert('Please select a file first.');
+            setIsSubmittingFile(false);
             return;
         }
 
@@ -71,7 +76,7 @@ export default function Home() {
                 method: 'POST',
                 body: formData,
             });
-
+            setIsSubmittingFile(false);
             if (response.ok) {
               const jsonData = await response.json(); // Assuming the server responds with JSON data
               localStorage.setItem('mappingData', JSON.stringify(jsonData)); // Temporarily store the data
@@ -81,6 +86,7 @@ export default function Home() {
             }
         } catch (error) {
             console.error("Error submitting file:", error);
+            setIsSubmittingFile(false);
         }
     };
 
@@ -107,14 +113,15 @@ export default function Home() {
             onChange={(e) => setJobDescription(e.target.value)}
           />
         </div>
-        <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Customize My Resume
+        <button type="submit" className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${isSubmittingResume ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingResume}>
+          {isSubmittingResume ? 'Customizing...' : 'Customize My Resume'}
         </button>
       </form>
 
       <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
             onClick={() => setShowModal(true)}
+            disabled={isSubmittingFile}
         >
             Don't have a portfolio? Get one now!
         </button>
@@ -124,8 +131,8 @@ export default function Home() {
                     <h2 className="text-lg font-bold">Upload Your Document</h2>
                     <form onSubmit={handleSubmitFile}>
                         <input type="file" onChange={handleFileChange} accept=".pdf,.docx" className="my-3" />
-                        <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                            Submit
+                        <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" disabled={isSubmittingFile}>
+                        {isSubmittingFile ? 'Submitting...' : 'Submit'}
                         </button>
                         <button type="button" onClick={() => setShowModal(false)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2">
                             Cancel

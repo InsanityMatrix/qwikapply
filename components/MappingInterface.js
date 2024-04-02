@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-const docxFields = ['Name', 'Address', 'Email', 'Phone', 'College', 'Projects', 'Leadership', 'Skills', 'Experience', 'Extracurriculars', 'Volunteering', 'Certificates', 'Interests' ];
+const docxFields = ['profile', 'college', 'projects', 'leadership', 'skills', 'experience', 'extracurriculars', 'volunteering', 'certificates', 'interests' ];
 
 const MappingInterface = ({ jsonKeys, onSubmitMappings }) => {
     const [mappings, setMappings] = useState({});
@@ -43,7 +43,7 @@ const MappingInterface = ({ jsonKeys, onSubmitMappings }) => {
                 <tbody>
                     {jsonKeys.map((key, index) => (
                         <tr key={key} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
-                            <td className="border px-4 py-2">{key}</td>
+                            <td className="border px-4 py-2">{key.charAt(0).toUpperCase() + key.slice(1)}</td>
                             <td className="border px-4 py-2">
                                 <select
                                     onChange={(e) => handleSelectChange(key, e.target.value)}
@@ -53,7 +53,7 @@ const MappingInterface = ({ jsonKeys, onSubmitMappings }) => {
                                     <option value="">Select a field</option>
                                     {docxFields.map((field) => (
                                         <option key={field} value={field}>
-                                            {field}
+                                            {field.charAt(0).toUpperCase() + field.slice(1)}
                                         </option>
                                     ))}
                                 </select>

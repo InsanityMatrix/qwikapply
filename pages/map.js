@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import MappingInterface from '../components/MappingInterface';
+import { useRouter } from 'next/router';
 
 export default function MapJson() {
     const [jsonData, setJsonData] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         const data = localStorage.getItem('mappingData');
@@ -17,8 +19,15 @@ export default function MapJson() {
         const newJsonData = {};
 
         for (const [jsonKey, docxField] of Object.entries(mappings)) {
-            // Assuming direct mapping for simplicity; adjust logic as needed for complex structures
-            newJsonData[docxField] = jsonData[jsonKey];
+            if (newJsonData.hasOwnProperty(docxField)) {
+                if (!Array.isArray(newJsonData[docxField])) {
+                    newJsonData[docxField] = [newJsonData[docxField]];
+                }
+                newJsonData[docxField].push(jsonData[jsonKey]);
+            } else {
+                // If it doesn't exist, simply assign the value
+                newJsonData[docxField] = jsonData[jsonKey];
+            }
         }
 
         // Convert the new JSON object to a string
@@ -40,6 +49,8 @@ export default function MapJson() {
 
         // Revoke the blob URL to free up resources
         URL.revokeObjectURL(url);
+        router.push('/');
+        
     };
 
     if (!jsonData) {
