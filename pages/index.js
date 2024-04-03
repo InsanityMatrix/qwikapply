@@ -184,14 +184,19 @@ export default function Home() {
     <div className="absolute top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-5 rounded-lg shadow-lg">
         <h2 className="text-lg font-bold">Upload Your Document (.docx, .pdf)</h2>
+        <p className="text-sm text-gray-600 mt-2 mb-4">
+          To ensure I can tailor your resume as accurately as possible, please include as much relevant information as you can. The more details you provide, the better I can customize your resume to match your ideal job description!
+        </p>
         <form onSubmit={handleSubmitFile}>
           <input type="file" onChange={handleFileChange} accept=".pdf,.docx" className="my-3" />
-          <button type="submit" className={`bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-full ${isSubmittingFile ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingFile}>
-            {isSubmittingFile ? 'Submitting...' : 'Submit'}
-          </button>
-          <button type="button" onClick={() => setShowModal(false)} className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full ml-2">
-            Cancel
-          </button>
+          <div className="flex justify-end space-x-2">
+            <button type="submit" className={`bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-full ${isSubmittingFile ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingFile}>
+              {isSubmittingFile ? 'Submitting...' : 'Submit'}
+            </button>
+            <button type="button" onClick={() => setShowModal(false)} className="bg-white-600 hover:bg-white-800 text-black font-bold py-2 px-4 rounded-full border-solid border-2">
+              Cancel
+            </button>
+          </div>
         </form>
         {isSubmittingFile ? (
           <div className="w-full max-w-lg bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
