@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Home() {
@@ -8,8 +8,30 @@ export default function Home() {
     const [jfile, setFile] = useState(null);
     const [isSubmittingResume, setIsSubmittingResume] = useState(false);
     const [isSubmittingFile, setIsSubmittingFile] = useState(false); 
+    const [progress, setProgress] = useState(0);
     const router = useRouter();
     
+    useEffect(() => {
+      let intervalId;
+      if (isSubmittingResume || isSubmittingFile) {
+        const duration = isSubmittingResume ? 30000 + Math.random() * 20000 : 20000 +Math.random() * 10000; // 20-30s for resume, 30-60s for file
+        const stepDuration = duration / 100;
+        
+        setProgress(0); // Reset progress at the start
+        intervalId = setInterval(() => {
+          setProgress((oldProgress) => {
+            if (oldProgress < 100) {
+              return oldProgress + 1;
+            }
+            clearInterval(intervalId); // Clear interval if progress is complete
+            return 100;
+          });
+        }, stepDuration);
+      }
+
+      return () => clearInterval(intervalId); // Cleanup interval on component unmount
+    }, [isSubmittingResume, isSubmittingFile]);
+
     const handleFileChange = (event) => {
         setFile(event.target.files[0]);
     };
@@ -129,6 +151,11 @@ export default function Home() {
       <button type="submit" className={`bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-full ${isSubmittingResume ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingResume}>
         {isSubmittingResume ? 'Customizing...' : 'Customize My Resume'}
       </button>
+      {isSubmittingResume ? (
+          <div className="w-full max-w-lg bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+          </div>
+        ) : null}
     </form>
   </div>
 
@@ -145,9 +172,15 @@ export default function Home() {
             Cancel
           </button>
         </form>
+        {isSubmittingFile ? (
+          <div className="w-full max-w-lg bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+          </div>
+        ) : null}
       </div>
     </div>
   )}
+  
 </div>
 
   );
