@@ -33,19 +33,19 @@ export default async function handler(req, res) {
 
     data = await preprocess(data, jobDesc);
     console.log(`GENERATED RESUME: ${JSON.stringify(data, null, 2)}`);
-    let hasProjects = data.projects ? true : false;
-    let hasLeadership = data.leadership ? true : false;
-    let hasSkills = data.skills ? true : false;
-    let hasExperience = data.experience ? true : false;
-    let hasExtra = data.extracurriculars ? true : false;
-    let hasVolunteer = data.volunteering ? true : false;
-    let hasCerts = data.certificates ? true : false;
-    let hasInterests = data.interests ? true : false;
+    let hasProjects = data.projects && data.projects.length > 0 ? true : false;
+    let hasLeadership = data.leadership && data.leadership.length > 0 ? true : false;
+    let hasSkills = data.skills && data.skills.length > 0 ? true : false;
+    let hasExperience = data.experiences && data.experiences.length > 0 ? true : false;
+    let hasExtra = data.extracurriculars && data.extracurriculars.length > 0 ? true : false;
+    let hasVolunteer = data.volunteering && data.volunteering.length > 0 ? true : false;
+    let hasCerts = data.certificates && data.certificates.length > 0 ? true : false;
+    let hasInterests = data.interests && data.interests.length > 0? true : false;
     console.log(`skills: ${JSON.stringify(data.skills)}`);
     doc.setData({
       profile: data.profile,
       college: data.college,
-      experiences: data.experience,
+      experiences: data.experiences,
       skills: data.skills,
       projects: data.projects,
       leadership: data.leadership,

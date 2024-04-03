@@ -41,15 +41,80 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: `Unsupported file type.: ${file.mimetype}` });
     }
     try {
+        let example = {
+            profile: {
+                name: "John Doe",
+                address: "West Lafayette, IN 47906",
+                phone: "(103) 558-2314",
+                email: "johndoe@example.com"
+            },
+            college: {
+                major: "BS in Cybersecurity",
+                minor: "Artificial Intelligence",
+                school: "Purdue University",
+                location: "West Lafayette, IN",
+                dates: "2022-2026"
+            },
+            certificates: [
+                "name of certificate"
+            ],
+            skills: [
+                {
+                    name: "Programming Languages",
+                    content: "Proficient in SQL, HTML, CSS, JavaScript, PHP"
+                }
+            ],
+            interests: [
+                {
+                    name: "Efficient DB Design",
+                    content: "Constructing efficient databases utilizing blah blah blah"
+                }
+            ],
+            projects: [
+                {
+                    name: "Project Name",
+                    description: "Project Description",
+                    link: "an optional link to project info"
+                }
+            ],
+            extracurriculars: [
+                {
+                    name: "Capture the Flags",
+                    description: "Description of Capture the flags"
+                }
+            ],
+            experiences: [
+                {
+                    company: "Company, Club, or whatever organizations name",
+                    position: "Position Held - optional",
+                    location: "Indianapolis, IN",
+                    dates: "2022 - Present",
+                    responsibilities: [
+                        "bulleted list of responsibilities/achievements/descriptions"
+                    ]
+                }
+            ],
+            leadership: [
+                {
+                    name: "Company, Club, or whatever organizations name",
+                    position: "Position Held - optional",
+                    location: "Indianapolis, IN",
+                    dates: "2022 - Present",
+                    responsibilities: [
+                        "bulleted list of responsibilities/achievements/descriptions"
+                    ]
+                }
+            ]
+        };
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo-0125",
             response_format: { "type": "json_object" },
             messages: [
-                {"role":"system", "content": "You are going to be fed word documents or pdfs that I have parsed and converted to text. You will convert it into a portfolio written in JSON. You will only respond with the JSON, nothing else.  Some data name standards: Full name will always be \"name\", address will be \"address\", phone number will be \"phone\", email will be \"email\", all of those will be in an object called \"profile\" any links will be \"link\". For education it will be an object called college, within it it will include major, minor, school, location, and dates. For things with multiples, like Experiences, Certifications, Projects, etc... you will always capitalize the first letter of the name of the array, and then you will a format each objects data as lowercase, some standards for Experiences would be: descriptions are always called responsibilities, and it is always an array, even if it is just one object. Project Objects always have a name and description, other things optional. Experience Objects will always call the position or title \"position\", and always call the place of experience \"company\". Extracurriculars will always be an array of \"name\", \"description\" objects. Any type of Skill will be in an array \"Skills\" and will have a \"name\" property and a \"content\" property."},
+                {"role":"system", "content": `You are going to be fed word documents or pdfs that I have parsed and converted to text. You will convert it into a portfolio written in JSON. You will only respond with the JSON, nothing else.  Some data name standards: Full name will always be \"name\", address will be \"address\", phone number will be \"phone\", email will be \"email\", all of those will be in an object called \"profile\" any links will be \"link\". For education it will be an object called college, within it it will include major, minor, school, location, and dates. For things with multiples, like Experiences, Certifications, Projects, etc... you will always capitalize the first letter of the name of the array, and then you will a format each objects data as lowercase, some standards for Experiences would be: descriptions are always called responsibilities, and it is always an array, even if it is just one object. Project Objects always have a name and description, other things optional. Experience Objects will always call the position or title \"position\", and always call the place of experience \"company\". Extracurriculars will always be an array of \"name\", \"description\" objects. Any type of Skill will be in an array \"Skills\" and will have a \"name\" property and a \"content\" property. Here is an example structure: ${JSON.stringify(example)}. DO NOT LEAVE OUT ANY DATA, Most can be included somewhere.`},
                 {"role": "user", "content": `${text}`}
             ],  
             temperature: 0.5,
-            max_tokens: 2048,
+            max_tokens: 4096,
         });
         console.log(response);
         const jsonData = JSON.parse(response.choices[0].message.content);

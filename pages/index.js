@@ -97,7 +97,7 @@ export default function Home() {
     <p className="mb-8 text-lg text-gray-600">Tailor Your Resume in Seconds</p>
 
     <div className="text-sm bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-      <p>Each resume generation costs us about $0.02. If you like my project, consider <a href="https://www.buymeacoffee.com/dvpiedra" className="font-bold underline">donating or buying me a coffee</a>!</p>
+      <p>Each resume generation costs us about $0.04. If you like my project, consider <a href="https://www.buymeacoffee.com/dvpiedra" className="font-bold underline">donating or buying me a coffee</a>!</p>
     </div>
 
     <button
@@ -135,10 +135,10 @@ export default function Home() {
   {showModal && (
     <div className="absolute top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-5 rounded-lg shadow-lg">
-        <h2 className="text-lg font-bold">Upload Your Document</h2>
+        <h2 className="text-lg font-bold">Upload Your Document (.docx, .pdf)</h2>
         <form onSubmit={handleSubmitFile}>
           <input type="file" onChange={handleFileChange} accept=".pdf,.docx" className="my-3" />
-          <button type="submit" className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-full" disabled={isSubmittingFile}>
+          <button type="submit" className={`bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-full ${isSubmittingFile ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingFile}>
             {isSubmittingFile ? 'Submitting...' : 'Submit'}
           </button>
           <button type="button" onClick={() => setShowModal(false)} className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full ml-2">

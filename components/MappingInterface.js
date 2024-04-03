@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-const docxFields = ['profile', 'college', 'projects', 'leadership', 'skills', 'experience', 'extracurriculars', 'volunteering', 'certificates', 'interests' ];
+const docxFields = ['profile', 'college', 'projects', 'leadership', 'skills', 'experiences', 'extracurriculars', 'volunteering', 'certificates', 'interests' ];
 
 const MappingInterface = ({ jsonKeys, onSubmitMappings }) => {
     const [mappings, setMappings] = useState({});
