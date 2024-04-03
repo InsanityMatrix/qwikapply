@@ -90,10 +90,10 @@ async function preprocess(data, jobDesc) {
   //}
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
+      model: "gpt-4-turbo-preview",
       response_format: { "type": "json_object" },
       messages: [
-        {"role":"system","content":`You are going to be given a JSON portfolio of a user. Reword components of this individuals portfolio where possible to include key words, or cater to the following job description. DO NOT LIE, DO NOT RENAME THINGS. You can reword descriptions/content if it is relevant, but do not add skills that you cannot reasonably deduce the user utilized. Reorder the json objects in each section to have the most relevant ones first. You should change descriptions to include keywords that are more relevant to the job where possible, assuming they would actually occur within said object. It should look not too far removed to the original. Make sure everything is written professionally, with correct sentence structure and capitalization, and draw attention to relevant skills. You are essentially creating this users perfect resume for this job using what they have done.\n You will send back the same JSON Structure, but also validate \"skills\" and rewrite it so it is an array of objects with \"name\" \"content\" attributes, and no array will have more than 4 objects, so drop the least relevant items. Job Description: ${jobDesc}`},
+        {"role":"system","content":`You are going to be given a JSON portfolio of a user. Reword components of this individuals portfolio where possible to include key words, or cater to the following job description. DO NOT LIE, DO NOT RENAME THINGS. You can reword descriptions/content if it is relevant, but do not add skills that you cannot reasonably deduce the user utilized. Reorder the json objects in each section to have the most relevant ones first. You should change descriptions to include keywords that are more relevant to the job where possible, assuming they would actually occur within said object. It should look not too far removed to the original. Make sure everything is written professionally, with correct sentence structure and capitalization, and draw attention to relevant skills, it should not be short but should not be long either. You are essentially creating this users perfect resume for this job using what they have done.\n You will send back the same JSON Structure, but also validate \"skills\" and rewrite it so it is an array of objects with \"name\" \"content\" attributes, and no array will have more than 4 objects, so drop the least relevant items. Job Description: ${jobDesc}`},
         {"role":"user","content":`${JSON.stringify(data, null, 2)}`}
       ],
       temperature: 0.5,
@@ -103,7 +103,7 @@ async function preprocess(data, jobDesc) {
     const jsonData = JSON.parse(response.choices[0].message.content);
     return jsonData;
   } catch (err) {
-    console.log(error);
-    return { message: `ERROR: ${error}`};
+    console.log(err);
+    return { message: `ERROR: ${err}`};
   }
 }

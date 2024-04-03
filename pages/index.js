@@ -91,56 +91,64 @@ export default function Home() {
     };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-4xl font-bold text-blue-600 mb-8">QwikApply</h1>
-      <p className="mb-6 text-lg text-gray-600">Tailor Your Resume in Seconds</p>
-      
-      <form onSubmit={handleSubmit} className="w-full max-w-lg">
-        <div className="flex flex-col mb-4">
-          <label htmlFor="resume" className="mb-2 text-sm font-bold text-gray-700">Upload Portfolio! (.pflo)</label>
-          <input id="resume" type="file" name="resume" accept=".pflo" className="form-input px-4 py-2 border rounded" required />
-        </div>
-        <div className="flex flex-col mb-6">
-          <label htmlFor="jobDescription" className="mb-2 text-sm font-bold text-gray-700">Job Description</label>
-          <textarea
-            id="jobDescription"
-            name="jobDescription"
-            rows="5"
-            className="form-textarea mt-1 block w-full border rounded px-4 py-2"
-            placeholder="Paste the job description here..."
-            required
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-          />
-        </div>
-        <button type="submit" className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${isSubmittingResume ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingResume}>
-          {isSubmittingResume ? 'Customizing...' : 'Customize My Resume'}
-        </button>
-      </form>
+    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-blue-50">
+  <div className="text-center bg-white shadow-md rounded-lg p-6 mb-4">
+    <h1 className="text-5xl font-bold text-blue-700 mb-4">QwikApply</h1>
+    <p className="mb-8 text-lg text-gray-600">Tailor Your Resume in Seconds</p>
 
-      <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
-            onClick={() => setShowModal(true)}
-            disabled={isSubmittingFile}
-        >
-            Don't have a portfolio? Get one now!
-        </button>
-        {showModal && (
-            <div className="absolute top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white p-5 rounded-lg">
-                    <h2 className="text-lg font-bold">Upload Your Document</h2>
-                    <form onSubmit={handleSubmitFile}>
-                        <input type="file" onChange={handleFileChange} accept=".pdf,.docx" className="my-3" />
-                        <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" disabled={isSubmittingFile}>
-                        {isSubmittingFile ? 'Submitting...' : 'Submit'}
-                        </button>
-                        <button type="button" onClick={() => setShowModal(false)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2">
-                            Cancel
-                        </button>
-                    </form>
-                </div>
-            </div>
-        )}
+    <div className="text-sm bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+      <p>Each resume generation costs us about $0.02. If you like my project, consider <a href="https://www.buymeacoffee.com/dvpiedra" className="font-bold underline">donating or buying me a coffee</a>!</p>
     </div>
+
+    <button
+      className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-full my-4 transition duration-300 ease-in-out"
+      onClick={() => setShowModal(true)}
+      disabled={isSubmittingFile}
+    >
+      Don't have a portfolio (.pflo)? Get one now!
+    </button>
+    
+    <form onSubmit={handleSubmit} className="w-full max-w-lg mx-auto">
+      <div className="flex flex-col mb-4">
+        <label htmlFor="resume" className="mb-2 text-sm font-bold text-gray-700">Upload Portfolio! (.pflo)</label>
+        <input id="resume" type="file" name="resume" accept=".pflo" className="form-input px-4 py-2 border rounded shadow-sm" required />
+      </div>
+      <div className="flex flex-col mb-6">
+        <label htmlFor="jobDescription" className="mb-2 text-sm font-bold text-gray-700">Job Description</label>
+        <textarea
+          id="jobDescription"
+          name="jobDescription"
+          rows="5"
+          className="form-textarea mt-1 block w-full border rounded px-4 py-2 shadow-sm"
+          placeholder="Paste the job description here..."
+          required
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+        />
+      </div>
+      <button type="submit" className={`bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-full ${isSubmittingResume ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isSubmittingResume}>
+        {isSubmittingResume ? 'Customizing...' : 'Customize My Resume'}
+      </button>
+    </form>
+  </div>
+
+  {showModal && (
+    <div className="absolute top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-5 rounded-lg shadow-lg">
+        <h2 className="text-lg font-bold">Upload Your Document</h2>
+        <form onSubmit={handleSubmitFile}>
+          <input type="file" onChange={handleFileChange} accept=".pdf,.docx" className="my-3" />
+          <button type="submit" className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-full" disabled={isSubmittingFile}>
+            {isSubmittingFile ? 'Submitting...' : 'Submit'}
+          </button>
+          <button type="button" onClick={() => setShowModal(false)} className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full ml-2">
+            Cancel
+          </button>
+        </form>
+      </div>
+    </div>
+  )}
+</div>
+
   );
 }
