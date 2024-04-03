@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-
+import {InformationCircleIcon } from '@heroicons/react/outline';
+import toast, { Toaster } from 'react-hot-toast';
 export default function Home() {
     const [jobDescription, setJobDescription] = useState('');
     const [resumeData, setResumeData] = useState(null);
@@ -9,6 +10,7 @@ export default function Home() {
     const [isSubmittingResume, setIsSubmittingResume] = useState(false);
     const [isSubmittingFile, setIsSubmittingFile] = useState(false); 
     const [progress, setProgress] = useState(0);
+    const [isHoveringInfo , setIsHoveringInfo] = useState(false);
     const router = useRouter();
     
     useEffect(() => {
@@ -67,6 +69,9 @@ export default function Home() {
             document.body.appendChild(link); // Append to the document
             link.click(); // Programmatically click the link to trigger the download
             link.remove(); // Clean up
+            toast.success('Your resume has been generated!');
+          } else if (response.status === 429) {
+            toast.error('Your IP has made a request within the past minute. Please slow down.');
           } else {
             console.log(response);
             console.error("Server responded with non-OK status" + response.status + " " + response.statusText);
@@ -114,6 +119,22 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-blue-50">
+  <div
+        className="absolute top-4 left-4"
+        onMouseEnter={() => setIsHoveringInfo(true)}
+        onMouseLeave={() => setIsHoveringInfo(false)}
+      >
+        <InformationCircleIcon className="h-6 w-6 text-blue-700 cursor-pointer" />
+        {isHoveringInfo && (
+          <div className="mt-2 w-64 p-4 bg-white border border-gray-200 rounded shadow-lg">
+            <p className="text-sm text-gray-600">This website does not save any data you submit to it.</p>
+          </div>
+        )}
+      </div>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+      />
   <div className="text-center bg-white shadow-md rounded-lg p-6 mb-4">
     <h1 className="text-5xl font-bold text-blue-700 mb-4">QwikApply</h1>
     <p className="mb-8 text-lg text-gray-600">Tailor Your Resume in Seconds</p>

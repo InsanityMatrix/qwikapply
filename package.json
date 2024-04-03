@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.6",
     "docx": "^8.5.0",
     "docxtemplater": "^3.46.2",
     "formidable": "^3.5.1",
@@ -18,7 +19,8 @@
     "pdf-parse": "^1.1.1",
     "pizzip": "^3.1.6",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",

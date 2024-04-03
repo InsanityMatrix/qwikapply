@@ -4,8 +4,19 @@ import fs from 'fs';
 import path from 'path';
 import { OpenAI } from "openai";
 const openai = new OpenAI();
-
+const lastRequestTimeByIP = {};
 export default async function handler(req, res) {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+  const currentTime = Date.now();
+  const lastRequestTime = lastRequestTimeByIP[ip];
+
+  // Check if the current request is within 60 seconds of the last request
+  if (lastRequestTime && currentTime - lastRequestTime < 60000) {
+    return res.status(429).json({ error: "Please wait a minute before making another request." });
+  }
+  
+
   if (req.method === 'POST') {
     let data = req.body.resume;
     let jobDesc = req.body.jobDescription;
@@ -30,7 +41,7 @@ export default async function handler(req, res) {
     });
 
     // Set the templateVariables
-
+    lastRequestTimeByIP[ip] = currentTime;
     data = await preprocess(data, jobDesc);
     console.log(`GENERATED RESUME: ${JSON.stringify(data, null, 2)}`);
     let hasProjects = data.projects && data.projects.length > 0 ? true : false;
