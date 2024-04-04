@@ -95,26 +95,131 @@ export default async function handler(req, res) {
 }
 
 async function preprocess(data, jobDesc) {
-  //TODO VALIDATE ALL DATA
-  //if (data.skills) {
-  //  data.skills = validate("name", "content");
-  //}
+  //Preprocess job description (possibly with gpt3) to cut down on GPT4 tokens:
+  if (WordCount(jobDesc) > 200) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo-0125",
+        response_format: { "type": "text" },
+        messages: [
+            {"role":"system", "content": `Shorten this job description for brevity and clarity. make sure key words stay the same, but boil it down to job name, qualifications expected, relevant experiences, etc.`},
+            {"role": "user", "content": `${jobDesc}`}
+        ],  
+        temperature: 0.5,
+        max_tokens: 2048,
+      });
+      jobDesc = response.choices[0].message.content;
+      console.log(`Changed jobDesc: ${jobDesc}`);
+    } catch (err) {
+      console.log(err);
+      return { message: `ERROR: ${err}`};
+    }
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       response_format: { "type": "json_object" },
       messages: [
-        {"role":"system","content":`You are going to be given a JSON portfolio of a user. Reword components of this individuals portfolio where possible to include key words, or cater to the following job description. DO NOT LIE, DO NOT RENAME THINGS. You can reword descriptions/content if it is relevant, but do not add skills that you cannot reasonably deduce the user utilized. Reorder the json objects in each section to have the most relevant ones first. You should change descriptions to include keywords that are more relevant to the job where possible, assuming they would actually occur within said object. It should look not too far removed to the original, and will not be obviously catered (Dont need to turn every description into something that translates to the job, just ones that matter more). Make sure everything is written professionally, with correct sentence structure and capitalization, and draw attention to relevant skills, it should not be short but should not be long either. You are essentially creating this users perfect resume for this job using what they have done.\n You will send back the same JSON Structure, but also validate \"skills\" and rewrite it so it is an array of objects with \"name\" \"content\" attributes, drop the least relevant items if there are too many. Return enough items to fill 1-1.5 pages (about 400 words of content), or a little bit extra, no less. Job Description: ${jobDesc}`},
+        {"role":"system","content":`Revise a JSON portfolio for a specific job. Include:
+        1. Emphasize relevant things using job description keywords.
+        2. Reorder for relevance; focus on top matching skills/experiences.
+        3. Rewrite descriptions professionally.
+        4. Validate 'skills' to [{'name', 'content'}].
+        5. Return object containing all revised items, sorted with most relevant items to least relevant 
+        
+        Job Description: ${jobDesc}`},
         {"role":"user","content":`${JSON.stringify(data, null, 2)}`}
       ],
       temperature: 0.5,
       max_tokens: 4096,
     });
 
-    const jsonData = JSON.parse(response.choices[0].message.content);
+    let jsonData = JSON.parse(response.choices[0].message.content);
+
+    //Iteratively count all words returned as content. Target 400 words max
+    let wc = CountPortfolio(jsonData);
+    while(wc > 370) {
+      jsonData = CutPortfolio(jsonData);
+      wc = CountPortfolio(jsonData);
+    }
+    
+
     return jsonData;
   } catch (err) {
     console.log(err);
     return { message: `ERROR: ${err}`};
   }
+}
+function CutPortfolio(portfolio) {
+  let keys = Object.keys(portfolio);
+  //Get longest array
+  let maxSize = 0;
+  let longestKey = undefined;
+  for(let i = 0; i < keys.length; i++) {
+    let key = keys[i];
+    if(Array.isArray(portfolio[key])) {
+      let arr = portfolio[key];
+      if(arr.length > maxSize) {
+        maxSize = arr.length;
+        longestKey = key;
+      }
+    }
+  }
+
+  if(longestKey) {
+    portfolio[longestKey].pop();
+  }
+  return portfolio;
+}
+
+function CountPortfolio(portfolio) {
+  let keys = Object.keys(portfolio);
+
+  let wordCount = 0;
+  for(let i = 0; i < keys.length; i++) {
+    let key = keys[i];
+    if(Array.isArray(portfolio[key])) {
+      let arr = portfolio[key];
+      for(let j = 0; j < arr.length; j++) {
+        let obj = arr[j];
+        if(typeof (obj) === 'object') {
+          let arrKeys = Object.keys(obj);
+          for(let k = 0; k < arrKeys.length; k++) {
+            wordCount += WordCount(obj[arrKeys[k]]);
+          }
+        } else {
+          wordCount += WordCount(obj);
+        }
+      }
+    }
+  }
+  return wordCount;
+}
+
+function WordCount(input) {
+  let str;
+  
+  // Check if input is an instance of an object or a string object
+  if (typeof input === 'object' && input !== null) {
+    // Attempt to convert object to string if it has toString method
+    if (input.toString && typeof input.toString === 'function') {
+      str = input.toString();
+    } else {
+      // Fallback or handle the case where conversion isn't straightforward
+      console.error('WordCount received an object that cannot be converted to a string:', input);
+      return 0;
+    }
+  } else if (typeof input === 'string') {
+    // Handle normal string inputs
+    str = input;
+  } else {
+    // Log and handle unexpected types
+    console.error('WordCount received an unexpected type:', typeof input);
+    return 0;
+  }
+  
+  return str.split(' ')
+            .filter(function(n) { return n != '' })
+            .length;
 }
