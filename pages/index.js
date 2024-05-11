@@ -52,7 +52,7 @@ export default function Home() {
           const text = e.target.result;
           const json = JSON.parse(text);
 
-          const response = await fetch('/api/process', {
+          const response = await fetch('/api/lprocess', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -99,7 +99,8 @@ export default function Home() {
         formData.append('document', jfile);
 
         try {
-            const response = await fetch('/api/genportfolio', {
+            //Old was /api/genportfolio
+            const response = await fetch('/api/localGenPortfolio', {
                 method: 'POST',
                 body: formData,
             });
@@ -140,7 +141,7 @@ export default function Home() {
     <p className="mb-8 text-lg text-gray-600">Tailor Your Resume in Seconds</p>
 
     <div className="text-sm bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-      <p>Each resume generation costs me about $0.04. If you like my project, consider <a href="https://www.buymeacoffee.com/dvpiedra" className="font-bold underline">donating or buying me a coffee</a>!</p>
+      <p>Each resume generation is now locally ran, with no external APIs! Collecting bad and results helps improve future generations, so feel free to <a href="mailto:dvpiedra1@outlook.com" className="font-bold underline">email me with your results</a>!</p>
     </div>
 
     <button
