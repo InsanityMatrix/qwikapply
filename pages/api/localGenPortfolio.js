@@ -108,6 +108,7 @@ export default async function handler(req, res) {
         };
 
         let prompt = "";
+        /*
         const System = `
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>\n
         Convert parsed documents to JSON according to this structure:
@@ -116,37 +117,25 @@ export default async function handler(req, res) {
         
         const User = "<|start_header_id|>user<|end_header_id|>\n" + `${text}` + "<|eot_id|>";
         const Assistant = "<|start_header_id|>assistant<|end_header_id|>\n";
+        */
+        const System = `### System Prompt\n
+        Convert parsed documents to JSON according to this structure:
+        ${JSON.stringify(example)}.
+        Include all available data in the appropriate fields, with minimal rewording. If no data is provided for a section, leave it blank. Ensure no duplication across sections. Respond only with JSON output.`;
+        const User = "\n### User Message\n" + `${text}`;
+        const Assistant = "\n### Assistant\n```json\n";
         prompt = System + User + Assistant;
 
         let response = await fetch(process.env.LOCAL_LLM, {
             method: 'POST',
             body: JSON.stringify({
                 prompt,
-                /*grammar: `root   ::= object
-                value  ::= object | array | string | number | ("true" | "false" | "null") ws
-                object ::=
-                    "{" ws (
-                            string ":" ws value
-                    ("," ws string ":" ws value)*
-                    )? "}" ws
-                array  ::=
-                    "[" ws (
-                            value
-                    ("," ws value)*
-                    )? "]" ws
-                string ::=
-                    "\\"" (
-                    [^"\\\\\\x7F\\x00-\\x1F] |
-                    "\\\\" (["\\\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F])
-                    )* "\\"" ws
-                number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
-                ws ::= ([ \\t\\n] ws)?`, */
                 temperature: 0.5,
+                stop: ['```']
             })
         });
         let output = await response;
         const rdata = await output.json();
-        console.log("Response: " + rdata.content);
         try {
             const jsonData = JSON.parse(rdata.content);
             const jsonString = JSON.stringify(jsonData, null, 2);
@@ -160,7 +149,8 @@ export default async function handler(req, res) {
             const end = rdata.content.lastIndexOf('}');
 
             const extractedContent = rdata.content.slice(start, end + 1);
-            const jsonData = JSON.parse(extractedContent);
+            const vettedString = fixJson(extractedContent);
+            const jsonData = JSON.parse(vettedString);
             const jsonString = JSON.stringify(jsonData, null, 2);
 
             res.setHeader('Content-Type', 'application/json');
@@ -173,7 +163,32 @@ export default async function handler(req, res) {
 
 };
 
-
-
-
+function fixJson(jsonString) {
+    // Fix missing double quotes around keys or string values
+    jsonString = jsonString.replace(/([\{\s,])(\w+)(:)/g, '$1"$2"$3');
+    jsonString = jsonString.replace(/:\s*(\w+)([,\s}])/g, ': "$1"$2');
+  
+    // Ensure proper closing of opened brackets and braces
+    const openBrackets = {'{': '}', '[': ']'};
+    const stack = [];
+    let fixedJson = '';
+    for (let char of jsonString) {
+        if (openBrackets[char]) {
+            stack.push(openBrackets[char]);
+            fixedJson += char;
+        } else if (stack.length > 0 && char === stack[stack.length - 1]) {
+            stack.pop();
+            fixedJson += char;
+        } else {
+            fixedJson += char;
+        }
+    }
+  
+    // Close any unclosed brackets or braces
+    while (stack.length > 0) {
+        fixedJson += stack.pop();
+    }
+  
+    return fixedJson;
+  }
 

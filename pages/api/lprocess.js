@@ -119,7 +119,7 @@ async function preprocess(data, jobDesc) {
   */
   try {
     let prompt = "";
-    const System = ` <|begin_of_text|><|start_header_id|>system<|end_header_id|>\n
+    /*const System = ` <|begin_of_text|><|start_header_id|>system<|end_header_id|>\n
     Revise a JSON portfolio for a specific job. Include:
     1. Emphasize relevant things using job description keywords.
     2. Reorder for relevance; focus on top matching skills/experiences.
@@ -131,12 +131,26 @@ async function preprocess(data, jobDesc) {
     Job Description: ${jobDesc}<|eot_id|>`;
     const User = `<|start_header_id|>user<|end_header_id|>\n${JSON.stringify(data, null, 2)}<|eot_id|>`;
     const Assistant = `<|start_header_id|>assistant<|end_header_id|>\n`
+    */
+    const System = `### System Prompt\nRevise a JSON portfolio for a specific job. Do the following:
+    1. Emphasize relevant things by using job description keywords.
+    2. Reorder for relevance; focus on top matching skills/experiences.
+    3. Rewrite descriptions professionally and concisely.
+    4. The JSON Schema should be structured exactly how you recieved it, only reorganized and rewritten.
+    5. Return object containing all revised items, sorted with most relevant items to least relevant 
+    6. Do not leave out anything that was in the original JSON
+    
+    Job Description: ${jobDesc}`
+
+    const User = `### User Message:\n${JSON.stringify(data, null, 2)}`;
+    const Assistant = "### Assistant:\n```json\n";
     prompt = System + User + Assistant;
     let response = await fetch(process.env.LOCAL_LLM, {
         method: 'POST',
         body: JSON.stringify({
             prompt,
-            temperature: 0.5
+            temperature: 0.5,
+            stop: ['```']
         })
     });
 
@@ -146,17 +160,13 @@ async function preprocess(data, jobDesc) {
     try {
       jsonData = JSON.parse(rdata.content);
   } catch (error) {
-      //AI didnt strictly grab json, get all contents between the ```json ```
-      //const matches = Array.from(rdata.content.matchAll(/```([a-zA-Z0-9_]+)\n([\s\S]*?)```/g));
-      //const json = matches.map(match => match[2]);
       const start = rdata.content.indexOf('{');
       const end = rdata.content.lastIndexOf('}');
-
       const extractedContent = rdata.content.slice(start, end + 1);
 
 
       
-      jsonData = JSON.parse(extractedContent);
+      jsonData = JSON.parse(fixJson(extractedContent));
   }
 
     //Iteratively count all words returned as content. Target 400 words max
@@ -244,4 +254,33 @@ function WordCount(input) {
   return str.split(' ')
             .filter(function(n) { return n != '' })
             .length;
+}
+
+function fixJson(jsonString) {
+  // Fix missing double quotes around keys or string values
+  jsonString = jsonString.replace(/([\{\s,])(\w+)(:)/g, '$1"$2"$3');
+  jsonString = jsonString.replace(/:\s*(\w+)([,\s}])/g, ': "$1"$2');
+
+  // Ensure proper closing of opened brackets and braces
+  const openBrackets = {'{': '}', '[': ']'};
+  const stack = [];
+  let fixedJson = '';
+  for (let char of jsonString) {
+      if (openBrackets[char]) {
+          stack.push(openBrackets[char]);
+          fixedJson += char;
+      } else if (stack.length > 0 && char === stack[stack.length - 1]) {
+          stack.pop();
+          fixedJson += char;
+      } else {
+          fixedJson += char;
+      }
+  }
+
+  // Close any unclosed brackets or braces
+  while (stack.length > 0) {
+      fixedJson += stack.pop();
+  }
+
+  return fixedJson;
 }
