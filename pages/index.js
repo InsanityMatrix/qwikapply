@@ -141,7 +141,7 @@ export default function Home() {
     <p className="mb-8 text-lg text-gray-600">Tailor Your Resume in Seconds</p>
 
     <div className="text-sm bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-      <p>Each resume generation is now locally ran, with no external APIs! Collecting bad and results helps improve future generations, so feel free to <a href="mailto:dvpiedra1@outlook.com" className="font-bold underline">email me with your results</a>!</p>
+      <p>This project has been temporarily deactivated as I rework my Infrastructure. You can check out the source code on <a href='https://github.com/InsanityMatrix/qwikapply'>GitHub</a>.</p> 
     </div>
 
     <button
